@@ -9,7 +9,7 @@ import Foundation
 struct Constants{
     struct Storyboard {
         
-        static let homeTabBarController = "Home"
+        static let homeTabBarController = "HomeTBC"
         static let landingViewController = "LandingVC"
         static let loginViewController = "LoginVC"
         

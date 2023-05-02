@@ -6,30 +6,67 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
 
 class ViewController: UIViewController {
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signUoButton: UIButton!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
+    var userDataDelegate: UserDataDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        signInButton.isHidden = true
+        signUoButton.isHidden = true
         
-        let isLoggedIn = UserDefaults.standard.bool(forKey: "usersignedin")
-        
-        if isLoggedIn {
+        if Auth.auth().currentUser != nil {
+            activityIndicator.startAnimating()
             
-            let homeTabBarController = self.storyboard?.instantiateViewController(withIdentifier: Constants.Storyboard.homeTabBarController) as? HomeTabBarController
-      
+            userDataDelegate = FirebaseHelper()
             
-            self.view.window?.rootViewController = homeTabBarController
-            self.view.window?.makeKeyAndVisible()
+            Task.init {
+                do {
+                    try await userDataDelegate.getCriticalData()
+                } catch {
+                    // .. handle error
+                    print("There was an error getting critical user data.")
+                }
+                
+                do {
+                    try await userDataDelegate.getBackgroundData()
+                } catch {
+                    // .. handle error
+                    print("There was an error getting background user data.")
+                }
+                // Show HomeViewController.
+                
+                let homeTabBarController = self.storyboard?.instantiateViewController(withIdentifier: Constants.Storyboard.homeTabBarController) as? HomeTabBarController
+          
+                
+                self.view.window?.rootViewController = homeTabBarController
+                self.view.window?.makeKeyAndVisible()
+               
         }
+        
+        } else {
+            activityIndicator.stopAnimating()
+            activityIndicator.isHidden = true
+            
+            signInButton.isHidden = false
+            signUoButton.isHidden = false
+            
+        }
+        
+}
     
+    
+    // MARK: - Navigation
+
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        return true
     }
 
 

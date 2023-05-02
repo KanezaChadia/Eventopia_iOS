@@ -105,7 +105,7 @@ class SignUpViewController: UIViewController {
         }
         
         // Validate email.
-        if !Utilities.isValidEmail(testStr: email) {
+        if !Utilities.isValidEmail(email: email) {
             // Show error.
             showError("The email that you have entered is invalid. Please enter a valid email address and try again.")
    
