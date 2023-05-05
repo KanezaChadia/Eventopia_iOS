@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import CoreData
+import Firebase
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,6 +16,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        FirebaseApp.configure()
+        
+        let userDefaults = UserDefaults.standard
+        
+        if !userDefaults.bool(forKey: "hasBeenLaunched") {
+            print("Launching app for the first time.")
+            
+            // Update user defaults.
+            userDefaults.set(true, forKey: "hasBeenLaunched")
+            
+            // Attempt to sign the previously signed in user out of Firebase.
+            do {
+              try Auth.auth().signOut()
+            } catch let signOutError as NSError {
+              print("Error signing out: %@", signOutError)
+            }
+
+            // Ensure user is signed out.
+            if FirebaseAuth.Auth.auth().currentUser == nil {
+                CurrentUser.currentUser = nil
+                CurrentLocation.location = nil
+                CurrentLocation.preferredLocation = nil
+            }
+        } else {
+            print("Launching app again.")
+        }
+        
+        
         return true
     }
 
