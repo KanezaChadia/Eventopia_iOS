@@ -12,6 +12,8 @@ import Kingfisher
 
 class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
     
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     let db = Firestore.firestore()
     let userId = Auth.auth().currentUser?.uid
     var docRef: DocumentReference?
@@ -25,6 +27,12 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
     var localEvents = [Event]()
     var selectedEvent: Event?
     var editEvent = false
+    var apiKey = "f5f6c4283773ca865ad9b308708d823a2f01101aa39aeabcba72bfde7014c9e8"
+    
+    var filteredEvents = [Event]()
+    var recentSearches = [String]()
+    var nonSearchBarInputStr = ""
+    var searchResults = [Event]()
     
     var favoritesDelegate: EventDataDelegate!
     var getImageDelegate: GetImageDelegate!
@@ -47,6 +55,12 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
                 locationStr = loc.city
                 getLocalEvents(loc: loc.searchStr)
             }
+            
+            searchBar.delegate = self
+            searchBar.placeholder = "Find Events"
+         
+           
+           
         }
         
         //getLocalEvents(loc: "Atlanta")
@@ -143,7 +157,7 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
         let session = URLSession(configuration: config)
         
         // Validate URL.
-        if let validURL = URL(string: "https://serpapi.com/search.json?engine=google_events&q=events+in+\(loc)&api_key=f5f6c4283773ca865ad9b308708d823a2f01101aa39aeabcba72bfde7014c9e8") {
+        if let validURL = URL(string: "https://serpapi.com/search.json?engine=google_events&q=events+in+\(loc)&api_key=\(apiKey)") {
             // Create task to download data from validURL as Data object.
             let task = session.dataTask(with: validURL, completionHandler: { (data, response, error) in
                 // Exit method if there is an error.
@@ -224,14 +238,14 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
     
     // MARK: - Table view data source
     
+
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return localEvents.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "table_cell_1", for: indexPath) as! CustomTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier:  "table_cell_1", for: indexPath)  as! CustomTableViewCell
         
         let event = localEvents[indexPath.row]
         
@@ -275,13 +289,15 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
             favoriteBtn.isSelected.toggle()
             favoriteBtn.tintColor = favoriteBtn.isSelected ? UIColor(red: 224/255, green: 210/255, blue: 104/255, alpha: 1) : .systemGray
         }
+            
+        
         
         return cell
         
     }
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        // Create custom header.
+        
         let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: "header_1") as? CustomTableViewHeader
         header?.cellTitleLbl?.text = "Events Near \(locationStr)"
 
@@ -345,3 +361,135 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
     
     
 }
+
+extension HomeTableViewController: UISearchBarDelegate{
+
+  
+
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        var inputStr = searchBar.text ?? ""
+
+        if inputStr.isEmpty {
+            inputStr = nonSearchBarInputStr
+        }
+
+        if !inputStr.isEmpty {
+            self.navigationItem.searchController?.searchBar.isHidden = true
+            // Run query
+            let formattedSearch = inputStr.replacingOccurrences(of: " ", with: "+")
+            let searchStr = ("\(formattedSearch)+in+\(locationStr)")
+            print(searchStr)
+
+            findEvents(searchStr: searchStr)
+            nonSearchBarInputStr = ""
+
+            // Limit recent searches to 20 items.
+            if recentSearches.count > 19 {
+                recentSearches.removeLast()
+            }
+
+            recentSearches.insert(inputStr, at: 0)
+        }
+    }
+
+       func updateSearchResults(for searchController: UISearchController) {
+           // Filter the events based on the search text
+           let searchText = searchController.searchBar.text ?? ""
+           filteredEvents = localEvents.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+
+           // Reload the table view with the filtered events
+           tableView.reloadData()
+       }
+
+    func findEvents(searchStr: String) {
+        // Clear searchResults array.
+        searchResults.removeAll()
+
+        // Create default configuration.
+        let config = URLSessionConfiguration.default
+
+        // Create session.
+        let session = URLSession(configuration: config)
+
+        // Validate URL.
+        if let validURL = URL(string: "https://serpapi.com/search.json?engine=google_events&q=\(searchStr)&api_key=\(apiKey)") {
+            // Create task to download data from validURL as Data object.
+            let task = session.dataTask(with: validURL, completionHandler: { (data, response, error) in
+                // Exit method if there is an error.
+                if let error = error {
+                    print("Task failed with error: \(error.localizedDescription)")
+                    return
+                }
+
+                // If there are no errors, check response status code and validate data.
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode == 200, // 200 = OK
+                      let validData = data
+                else {
+                    DispatchQueue.main.async {
+                        // Present alert on main thread if there is an error with the URL (subreddit does not exist).
+//                        self.present(alert, animated: true, completion: nil)
+                    }
+
+                    print("JSON object creation failed.")
+                    return
+                }
+
+                // Create event object.
+                do {
+                    // Create json Object from downloaded data above and cast as [String: Any].
+                    if let jsonObj = try JSONSerialization.jsonObject(with: validData, options: .mutableContainers) as? [String: Any] {
+                        guard let data = jsonObj["events_results"] as? [[String: Any]]
+                        else {
+                            print("This isn't working")
+                            return
+                        }
+
+                        for event in data {
+                            // Step through outer level data to get to relevant post data.
+                            guard let title = event["title"] as? String,
+                                  let date = event["date"] as? [String: Any],
+                                  let address = event["address"] as? [String],
+                                  let link = event["link"] as? String,
+                                  let description = event["description"] as? String,
+                                  let tickets = event["ticket_info"] as? [[String: Any]],
+                                  let imageUrl = event["thumbnail"] as? String
+                            else {
+                                print("There was an error with this event's data")
+
+                                continue
+                            }
+
+                            guard let start = date["start_date"] as? String,
+                                  let when = date["when"] as? String
+                            else {
+                                print("This isn't working")
+                                return
+                            }
+
+                            let dateStr = "\(start) | \(when)"
+                            let addressStr = "\(address[0]), \(address[1])"
+                            let eventImage = UIImage(named: "logo_placeholder")!
+
+                            self.searchResults.append(Event(id: "", title: title, date: dateStr, address: addressStr, link: link, description: description, tickets: tickets, imageUrl: imageUrl, image: eventImage))
+                        }
+                    }
+                }
+                catch{
+                    print("Error: \(error.localizedDescription)")
+                }
+
+                self.searchResults = self.searchResults.sorted(by: { $0.dateStamp < $1.dateStamp })
+
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+
+                    self.navigationItem.searchController?.searchBar.isHidden = false
+                }
+            })
+            // Start task.
+            task.resume()
+        }
+    }
+   }

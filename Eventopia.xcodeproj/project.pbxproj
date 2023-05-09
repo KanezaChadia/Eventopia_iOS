@@ -42,6 +42,7 @@
 		6C9D19B329FF4E14009FB68B /* EventsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9D19B229FF4E14009FB68B /* EventsViewController.swift */; };
 		6C9D19B529FF7F10009FB68B /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9D19B429FF7F0F009FB68B /* ProfileViewController.swift */; };
 		6C9D19B729FF80DC009FB68B /* CustomImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9D19B629FF80DC009FB68B /* CustomImageView.swift */; };
+		6CA1959F2A08326900C71CB0 /* EditProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA1959E2A08326900C71CB0 /* EditProfileViewController.swift */; };
 		6CB533442A009811006989B9 /* CreateEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB533432A009811006989B9 /* CreateEventViewController.swift */; };
 		6CB533462A009AA4006989B9 /* CustomActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB533452A009AA4006989B9 /* CustomActivityIndicatorView.swift */; };
 		6CB68C722A006C1800378F57 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB68C712A006C1800378F57 /* Image.swift */; };
@@ -80,6 +81,7 @@
 		6C9D19B229FF4E14009FB68B /* EventsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsViewController.swift; sourceTree = "<group>"; };
 		6C9D19B429FF7F0F009FB68B /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		6C9D19B629FF80DC009FB68B /* CustomImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomImageView.swift; sourceTree = "<group>"; };
+		6CA1959E2A08326900C71CB0 /* EditProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileViewController.swift; sourceTree = "<group>"; };
 		6CB533432A009811006989B9 /* CreateEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventViewController.swift; sourceTree = "<group>"; };
 		6CB533452A009AA4006989B9 /* CustomActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomActivityIndicatorView.swift; sourceTree = "<group>"; };
 		6CB68C712A006C1800378F57 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 				6C50FC5429F8CA7700224CB1 /* LaunchScreen.storyboard */,
 				6C50FC6629F8D08B00224CB1 /* GoogleService-Info.plist */,
 				6C50FC5729F8CA7700224CB1 /* Info.plist */,
+				6CA1959E2A08326900C71CB0 /* EditProfileViewController.swift */,
 			);
 			path = Eventopia;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6CA1959F2A08326900C71CB0 /* EditProfileViewController.swift in Sources */,
 				6C50FC4E29F8CA7500224CB1 /* LandingVC.swift in Sources */,
 				6C9D19B729FF80DC009FB68B /* CustomImageView.swift in Sources */,
 				6C50FC7A29F9B19500224CB1 /* Constants.swift in Sources */,
