@@ -55,7 +55,7 @@ class EventsViewController: UIViewController,UITableViewDelegate, UITableViewDat
     }
     
     @IBAction func segmentedControlChanged(_ sender: UISegmentedControl) {
-        
+        noEventMsgLbl.isHidden = !eventTypeArray[segmentedControl.selectedSegmentIndex].isEmpty
         self.tableView.reloadSections(IndexSet([0]), with: .fade)
     }
     
@@ -105,7 +105,25 @@ class EventsViewController: UIViewController,UITableViewDelegate, UITableViewDat
                 }
             })
         } else {
-            cell.eventImageView.image = event.image
+            //cell.eventImageView.image = event.image
+            
+            cell.eventImageView.kf.indicatorType = .activity
+            cell.eventImageView.kf.setImage(with: URL(string: event.imageUrl), placeholder: event.image, options: [.transition(.fade(1))], completionHandler: { result in
+                switch result {
+                case .success(let value):
+                    dataToShow[indexPath.row].image = value.image
+                    event.image = value.image
+                    
+                    CurrentUser.currentUser?.userEvents?.first(where: { $0.id == event.id})?.image = value.image
+                    break
+                    
+                case .failure(let error):
+                    if !error.isTaskCancelled && !error.isNotCurrentTask {
+                        print("Error getting image: \(error)")
+                    }
+                    break
+                }
+            })
         }
 
         cell.eventDateLbl.text = event.date
@@ -132,9 +150,6 @@ class EventsViewController: UIViewController,UITableViewDelegate, UITableViewDat
 
         return cell
     }
-    
-    
-    // MARK: - UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Deselect row for animation purposes.
@@ -165,12 +180,20 @@ class EventsViewController: UIViewController,UITableViewDelegate, UITableViewDat
             }
         }
         
-//        if let destination = segue.destination as? CreateEventViewController {
+        if  segue.identifier == "goToEdit",
+                   let destination = segue.destination as? CreateEventViewController {
+                        destination.event = self.selectedEvent
+                        destination.updateLV = {
+                            self.updateLV = true
+                        }
+        }
+        
+        if let destination = segue.destination as? CreateEventViewController {
 //            destination.event = self.selectedEvent
-//            destination.updateCV = {
-//                self.updateLV = true
-//            }
-//        }
+            destination.updateLV = {
+                self.updateLV = true
+            }
+        }
     }
 
 }

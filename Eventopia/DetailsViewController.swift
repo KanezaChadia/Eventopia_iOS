@@ -70,6 +70,10 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
         
         doneBtn.layer.cornerRadius = 10
         doneBtn.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
+        
+        if let past = event?.isPast, past == true, event?.status == "attending" {
+            removeEventBtn.isEnabled = false
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -102,13 +106,12 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
         self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func addButtonTapped(_ sender: Any) {
+    @IBAction func addToEventsTapped(_ sender: UIButton) {
         
         if event != nil && docRef != nil {
             
             if self.isFav {
-                // If an event has just been added as a favorite, it will not have an id.
-                // Check if the event's id property is empty and attempt to get it if it exists in user's userEvents array.
+                
                 if self.eventId.isEmpty {
                     if let eId = CurrentUser.currentUser?.userEvents?.first(where: { $0.title == self.eventTitle && $0.link == self.eventLink})?.id {
                         self.eventId = eId
@@ -158,9 +161,16 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
             }
             
         }
-        
     }
     
+
+    
+    @IBAction func editEventTapped(_ sender: UIButton) {
+        
+        editEvent?()
+        
+        self.dismiss(animated: true, completion: nil)
+    }
     
     @IBAction func removeEventTapped(_ sender: Any) {
         
@@ -183,7 +193,7 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
             if self.isCreated || !self.isFav {
                 self.deleteFirebaseEvent()
             } else if self.isFav {
-                self.notGoingToFavoritedEvent(disableButtonView: self.removeEventBtn)
+                self.notGoingToFavoritedEvent(disableButtonView: self.buttonsView)
             }
         }))
         
@@ -195,6 +205,16 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
     private func saveEventToFirebase(eventId: String) {
         self.eventDataDelegate.addUserEvent(uId: self.userId!, eventId: eventId, isCreated: false) { result in
             if result == true {
+                // Update displayed event.
+                self.event?.id = eventId
+                self.event?.status = "attending"
+                self.eventId = eventId
+                self.eventOrganizerId = self.userId!
+                
+                CurrentUser.currentUser?.userEvents?.append(self.event!)
+                
+                self.updateVisibleButtons(going: true)
+                
                 print("Event Was saved!")
             }
         }
@@ -229,6 +249,7 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
         } else {
             // Update visible buttons.
             addEventBtn.isHidden = false
+            removeEventBtn.isHidden = true
           
         }
         
@@ -345,27 +366,21 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
         UIApplication.shared.open(url)
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?){
+        // Action if navigating to DetailsViewController.
+        
+        if let destination = segue.destination as? CreateEventViewController {
+            // Send selected event and userEvents array to DetailsViewController.
+            destination.event = self.event
+        }
     }
-    */
-
 }
-//extension DetailsViewController: UILabelClickableLinksDelegate {
-//    func clickableLabel(_ label: UILblClickableLinks, didTapUrl urlStr: String, atRange range: NSRange) {
-//        guard let url = URL(string: urlStr) else { return }
-//        UIApplication.shared.open(url)
-//    }
-//}
+
 
 private extension MKMapView {
     func centerToLocation(_ location: CLLocation, regionRadius: CLLocationDistance = 200) {
         let coordinateRegion = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: regionRadius, longitudinalMeters: regionRadius)
         setRegion(coordinateRegion, animated: true)
     }
+   
 }

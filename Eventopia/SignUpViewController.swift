@@ -225,18 +225,30 @@ extension SignUpViewController: UIImagePickerControllerDelegate, UINavigationCon
     
     func presentCamera(){
         let vc = UIImagePickerController()
-        vc.sourceType = .camera
-        vc.delegate = self
-        vc.allowsEditing = true
-        present(vc, animated: true)
+        if !UIImagePickerController.isSourceTypeAvailable(.camera) {
+            let alertController = UIAlertController(title: nil, message: "Device has no camera.", preferredStyle: .alert)
+            
+            let okAction = UIAlertAction(title: "Alright", style: .default, handler: { (alert: UIAlertAction!) in
+            })
+            
+            alertController.addAction(okAction)
+            self.present(alertController, animated: true, completion: nil)
+        } else {
+            // Other action
+            
+            vc.sourceType = .camera
+            vc.delegate = self
+            vc.allowsEditing = true
+            present(vc, animated: true)
+        }
     }
     
     func presentPhotoPicker(){
         let vc = UIImagePickerController()
-        vc.sourceType = .photoLibrary
-        vc.delegate = self
-        vc.allowsEditing = true
-        present(vc, animated: true)
+            vc.sourceType = .photoLibrary
+            vc.delegate = self
+            vc.allowsEditing = true
+            present(vc, animated: true)
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

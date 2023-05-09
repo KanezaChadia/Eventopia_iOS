@@ -10,31 +10,26 @@ import MapKit
 import Firebase
 import FirebaseStorage
 
-class CreateEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class CreateEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITableViewDelegate, UITableViewDataSource {
    
     
     
-
-    @IBOutlet weak var eventTitleField: UITextField!
     @IBOutlet weak var eventImageView: UIImageView!
-    @IBOutlet weak var eventDateField: UITextField!
-    
-    @IBOutlet weak var eventPriceField: UITextField!
-    @IBOutlet weak var eventDescriptionTV: UITextView!
-    
-    @IBOutlet weak var eventLocationTV: UITextField!
-    
-    @IBOutlet weak var eventDatePicker: UIDatePicker!
-    
-    @IBOutlet weak var dateDoneButton: UIButton!
-    
-    @IBOutlet weak var createButton: UIButton!
-    
-   
-    @IBOutlet weak var datePickerBackView: UIView!
-    @IBOutlet weak var dateAreaTap: UIView!
-    
+    @IBOutlet weak var deleteBtn: UIBarButtonItem!
+    @IBOutlet weak var createEventBtn: UIButton!
+    @IBOutlet weak var eventTitleTF: UITextField!
+    @IBOutlet weak var eventDateTF: UITextField!
+    @IBOutlet weak var eventPriceTF: UITextField!
+    @IBOutlet weak var eventDescrTF: UITextView!
+    @IBOutlet weak var locationSuggestionTV: UITableView!
+    @IBOutlet weak var eventLocationTF: UITextField!
     @IBOutlet weak var datePickerView: CustomActivityIndicatorView!
+    @IBOutlet weak var datePickerBackGround: UIView!
+    @IBOutlet weak var datePicker: UIDatePicker!
+    @IBOutlet weak var dateDoneBtn: UIButton!
+    @IBOutlet weak var dateGestureView: UIView!
+    
+    @IBOutlet weak var NavBar: UINavigationBar!
     
     let db = Firestore.firestore()
     let userId = Auth.auth().currentUser?.uid
@@ -42,6 +37,7 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     
     var eventDataDelegate: EventDataDelegate!
     
+    var updateLV: (() -> Void)?
    
     private var searchCompleter: MKLocalSearchCompleter?
     private var searchRegion: MKCoordinateRegion = MKCoordinateRegion(MKMapRect.world)
@@ -64,6 +60,7 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
 
         
         docRef = db.collection("users").document(userId!)
@@ -78,25 +75,29 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         eventImageView.addGestureRecognizer(imgTapRecognizer)
         
         dateTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(pickDate(_:)))
-        dateAreaTap.addGestureRecognizer(dateTapRecognizer)
-        
-
-
+        dateGestureView.addGestureRecognizer(dateTapRecognizer)
 
         // Style views.
         eventImageView.layer.cornerRadius = 10
-        datePickerBackView.layer.cornerRadius = 10
+        datePickerBackGround.layer.cornerRadius = 10
        
-        eventDescriptionTV.layer.cornerRadius = 6
-        eventDescriptionTV.layer.borderWidth = 2
-        eventDescriptionTV.layer.borderColor = UIColor(red: 194/255, green: 231/255, blue: 250/255, alpha: 1).cgColor
+        eventDescrTF.layer.cornerRadius = 6
+        eventDescrTF.layer.borderWidth = 2
+        eventDescrTF.layer.borderColor = UIColor(red: 194/255, green: 231/255, blue: 250/255, alpha: 1).cgColor
                 
         // Populate fields if an event is being edited.
         if event != nil {
             editEvent = true
             eventId = event!.id
             populateFields()
+        }else {
+            deleteBtn.isEnabled = false
+            deleteBtn.tintColor = .clear
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.view.addSubview(NavBar)
     }
     
     
@@ -104,6 +105,65 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         datePickerView.activityIndicator.isHidden = true
         datePickerView.statusLbl.isHidden = true
         datePickerView.isHidden = false
+    }
+    @IBAction func deleteBtnTapped(_ sender: Any) {
+        
+        // Create alert to be displayed if proper conditions are not met.
+        let alert = UIAlertController(title: "Delete Event?", message: "Are you sure that you want to delete this event? Doing so will delete this event along with all associated media and this action cannot be undone.", preferredStyle: .alert)
+        // Add actions to alert controller.
+        alert.addAction(UIAlertAction(title: "Keep", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { action in
+            self.eventDataDelegate.deleteFirebaseEvent(event: self.event!) { result in
+                if result == false {
+                    print("There was an issue deleting this event.")
+                } else {
+                    self.dismiss(animated: true, completion: nil)
+                }
+            }
+        }))
+        
+        // Show alert.
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    @IBAction func updateSuggestionResults(_ sender: UITextField) {
+        searchCompleter?.queryFragment = eventLocationTF.text ?? ""
+    }
+    
+    @IBAction func hideSuggestions(_ sender: UITextField) {
+        stopProvidingCompletions()
+        locationSuggestionTV.isHidden = true
+    }
+    
+    @IBAction func suggestLocation(_ sender: Any) {
+        startProvidingCompletions()
+        locationSuggestionTV.isHidden = false
+    }
+    
+    
+    private func startProvidingCompletions() {
+        searchCompleter = MKLocalSearchCompleter()
+        searchCompleter?.delegate = self
+        searchCompleter?.resultTypes = [.pointOfInterest, .address]
+        searchCompleter?.region = searchRegion
+    }
+    
+    private func stopProvidingCompletions() {
+        searchCompleter = nil
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if eventDescrTF.textColor == .systemGray3 {
+            eventDescrTF.text = nil
+            eventDescrTF.textColor = .label
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if eventDescrTF.text.isEmpty {
+            eventDescrTF.text = "Event Description"
+            eventDescrTF.textColor = .systemGray3
+        }
     }
     
     @objc func setPicture(_ sender: UIImageView) {
@@ -162,16 +222,20 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     @IBAction func datePickingDone(_ sender: Any) {
         let formatter = DateFormatter()
         
-        formatter.calendar = eventDatePicker.calendar
+        formatter.calendar = datePicker.calendar
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         
-        var dateString = formatter.string(from: eventDatePicker.date)
+        var dateString = formatter.string(from: datePicker.date)
         dateString = dateString.replacingOccurrences(of: ",", with: "")
         dateString = dateString.replacingOccurrences(of: "at", with: "|")
         
-        eventDateField.text = dateString
+        eventDateTF.text = dateString
         datePickerView.isHidden = true
+    }
+    
+    @IBAction func cancelBtnTapped(_ sender: UIBarButtonItem) {
+        self.dismiss(animated: true, completion: nil)
     }
     
 
@@ -185,11 +249,11 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         
         // Ensure required fields are not empty.
-        guard let eventTitle = eventTitleField.text, !eventTitle.isEmpty,
-              let eventDate = eventDateField.text, !eventDate.isEmpty,
-              let eventPrice = eventPriceField.text, !eventPrice.isEmpty,
-              let eventLocation = eventLocationTV.text, !eventLocation.isEmpty,
-              let eventDescription = eventDescriptionTV.text, !eventDescription.isEmpty
+        guard let eventTitle = eventTitleTF.text, !eventTitle.isEmpty,
+              let eventDate = eventDateTF.text, !eventDate.isEmpty,
+              let eventPrice = eventPriceTF.text, !eventPrice.isEmpty,
+              let eventLocation = eventLocationTF.text, !eventLocation.isEmpty,
+              let eventDescription = eventDescrTF.text,!eventDescription.isEmpty
         else {
             alert.title = "Missing Info"
             alert.message = "All fields must be completed to continue."
@@ -221,8 +285,8 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         datePickerView.activityIndicator.isHidden = false
         datePickerView.statusLbl.isHidden = false
         datePickerView.isHidden = true
-        datePickerBackView.isHidden = true
-        dateDoneButton.isHidden = true
+        datePickerBackGround.isHidden = true
+        dateDoneBtn.isHidden = true
         datePickerView.activityIndicator.startAnimating()
         datePickerView.isHidden = false
         
@@ -255,19 +319,19 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     }
     private func populateFields() {
         eventImageView.image = event?.image
-        eventTitleField.text = event?.title
-        eventDateField.text = event?.date
+        eventTitleTF.text = event?.title
+        eventDateTF.text = event?.date
         
         if let price = event?.tickets[0]["source"] as? String {
-            eventPriceField.text = price
+            eventPriceTF.text = price
         }
 
-        eventLocationTV.text = event?.address
-        eventDescriptionTV.text = event?.description
-        eventDescriptionTV.textColor = .label
+        eventLocationTF.text = event?.address
+        eventDescrTF.text = event?.description
+        eventDescrTF.textColor = .label
         
         // Change createButton text.
-        createButton.setTitle("Save Changes", for: .normal)
+        createEventBtn.setTitle("Save Changes", for: .normal)
     }
     
     
@@ -327,6 +391,7 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
                     
                     print("Document successfully updated")
                     
+                    self.updateLV?()
                     self.showSuccessAlert()
                 }
             }
@@ -393,9 +458,9 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
             self.datePickerView.activityIndicator.stopAnimating()
             self.datePickerView.activityIndicator.isHidden = true
             self.datePickerView.statusLbl.isHidden = true
-            self.eventDatePicker.isHidden = false
-            self.eventDatePicker.isHidden = false
-            self.dateDoneButton.isHidden = false
+            self.datePicker.isHidden = false
+            self.datePicker.isHidden = false
+            self.dateDoneBtn.isHidden = false
             self.dismiss(animated: true, completion: nil)
         }))
         
@@ -425,14 +490,34 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         return cell
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    // MARK: - UITableViewDelegate
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // Deselect row for animation purposes.
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        if let suggestion = completerResults?[indexPath.row] {
+            eventLocationTF.text = "\(suggestion.title) \(suggestion.subtitle)"
+            locationSuggestionTV.isHidden = true
+        }
     }
-    */
+    
 
+}
+
+extension CreateEventViewController: MKLocalSearchCompleterDelegate {
+
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        // As the user types, new completion suggestions are continuously returned to this method.
+        // Overwrite the existing results, and then refresh the UI with the new results.
+        completerResults = completer.results
+        locationSuggestionTV.reloadData()
+    }
+    
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        // Handle any errors returned from MKLocalSearchCompleter.
+        if let error = error as NSError? {
+            print("MKLocalSearchCompleter encountered an error: \(error.localizedDescription). The query fragment is: \"\(completer.queryFragment)\"")
+        }
+    }
 }
