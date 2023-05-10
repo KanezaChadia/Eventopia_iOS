@@ -21,7 +21,7 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
     let manager = CLLocationManager()
     
     var useCurrentLocation = true
-    var locationStr = "Kigali, RW"
+    var locationStr = "Kigali,RW"
     var allUserEvents = [Event]()
     var userUpcomingEvents = [Event]()
     var localEvents = [Event]()
@@ -33,6 +33,7 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
     var recentSearches = [String]()
     var nonSearchBarInputStr = ""
     var searchResults = [Event]()
+    var tempLocalEvents = [Event]()
     
     var favoritesDelegate: EventDataDelegate!
     var getImageDelegate: GetImageDelegate!
@@ -363,10 +364,24 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
 }
 
 extension HomeTableViewController: UISearchBarDelegate{
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        self.searchBar.showsCancelButton = true
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.showsCancelButton = false
+        searchBar.text = ""
+        
+        if(!tempLocalEvents.isEmpty){
+            localEvents = tempLocalEvents
+            //getLocalEvents(loc: locationStr)
+        }
+        
+        tableView.reloadData()
+    }
 
-  
-
-
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         var inputStr = searchBar.text ?? ""
 
@@ -411,11 +426,13 @@ extension HomeTableViewController: UISearchBarDelegate{
 
         // Create session.
         let session = URLSession(configuration: config)
+        
+        let stringURL = "https://serpapi.com/search.json?engine=google_events&q=\(searchStr)&api_key=\(apiKey)"
 
         // Validate URL.
-        if let validURL = URL(string: "https://serpapi.com/search.json?engine=google_events&q=\(searchStr)&api_key=\(apiKey)") {
+        if let validURL = URL(string: stringURL) {
             // Create task to download data from validURL as Data object.
-            let task = session.dataTask(with: validURL, completionHandler: { (data, response, error) in
+            let task = session.dataTask(with: validURL, completionHandler: { [self] (data, response, error) in
                 // Exit method if there is an error.
                 if let error = error {
                     print("Task failed with error: \(error.localizedDescription)")
@@ -473,6 +490,8 @@ extension HomeTableViewController: UISearchBarDelegate{
                             let eventImage = UIImage(named: "logo_placeholder")!
 
                             self.searchResults.append(Event(id: "", title: title, date: dateStr, address: addressStr, link: link, description: description, tickets: tickets, imageUrl: imageUrl, image: eventImage))
+                            self.tempLocalEvents = localEvents
+                            self.localEvents = searchResults
                         }
                     }
                 }
