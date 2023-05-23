@@ -11,6 +11,7 @@ import FirebaseAuth
 
 class LogInViewController: UIViewController {
 
+    @IBOutlet weak var activityIndView: UIActivityIndicatorView!
     @IBOutlet weak var emailTF: UITextField!
     @IBOutlet weak var passwordTF: UITextField!
     @IBOutlet weak var loginBtn: UIButton!
@@ -24,8 +25,6 @@ class LogInViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -41,8 +40,6 @@ class LogInViewController: UIViewController {
         //style the elements
        
         Utilities.styleFilledButton(loginBtn)
-        
-    
     }
     
     func showError(_ message:String){
@@ -65,6 +62,9 @@ class LogInViewController: UIViewController {
             return
         }
         
+        activityIndView.startAnimating()
+            //.activityIndicator.startAnimating()
+        
         // Use Firebase to authenticate user
         FirebaseAuth.Auth.auth().signIn(withEmail: email, password: password, completion: {result, error in
             // Ensure there are no errors while signing in.
@@ -79,15 +79,7 @@ class LogInViewController: UIViewController {
             print("You have been signed in.")
             self.getUserData()
             
-            UserDefaults.standard.set(true, forKey: "usersignedin")
-            UserDefaults.standard.set(email, forKey: "email")
-            
-            self.transitionToHome()
-
-            
         })
-        
-        
     }
     
     @IBAction func forgotPasswordTapped(_ sender: Any) {
@@ -139,10 +131,6 @@ class LogInViewController: UIViewController {
                 print("There was an error getting critical user data.")
             }
             
-
-            // Show HomeViewController.
-            self.transitionToHome()
-            
             do {
                 try await userDataDelegate.getBackgroundData()
             } catch {
@@ -150,6 +138,12 @@ class LogInViewController: UIViewController {
                 print("There was an error getting background user data.")
             }
         }
+        
+        // Show HomeViewController.
+        
+        activityIndView.stopAnimating()
+        activityIndView.isHidden = true
+        transitionToHome()
     }
     
     
