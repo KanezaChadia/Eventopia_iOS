@@ -10,7 +10,7 @@ import MapKit
 import Firebase
 import FirebaseStorage
 
-class CreateEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITableViewDelegate, UITableViewDataSource {
+class CreateEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITextViewDelegate,UITableViewDelegate, UITableViewDataSource {
    
     
     
@@ -76,6 +76,8 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         
         dateTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(pickDate(_:)))
         dateGestureView.addGestureRecognizer(dateTapRecognizer)
+        
+        eventDescrTF.delegate = self
 
         // Style views.
         eventImageView.layer.cornerRadius = 10

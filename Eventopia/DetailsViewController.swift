@@ -121,7 +121,18 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
                         return
                     }
                 }
-                
+                if let index = CurrentUser.currentUser?.userEvents?.firstIndex(where: { $0.id == self.eventId }) {
+                    // Update displayed event.
+                    self.event?.status = "attending"
+                    
+                    self.eventOrganizerId = self.userId!
+                    
+                    CurrentUser.currentUser?.userEvents?[index] = self.event!
+                    
+                    print("Document successfully updated")
+                    
+                    self.updateVisibleButtons(going: true)
+                }
        
             } else{
                 // Check if event already exists in Firebase "events" collection.
@@ -201,6 +212,18 @@ class DetailsViewController: UIViewController, UILabelClickableLinksDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
+    @IBAction func favoriteButtonTapped(_ sender: UIButton) {
+        if event != nil {
+            eventDataDelegate.setFavorite(event: event!, isFav: !favoriteBtn.isSelected)
+            
+            self.isFav = !favoriteBtn.isSelected
+            
+            favoriteBtn.isSelected.toggle()
+            
+            favoriteBtn.tintColor = favoriteBtn.isSelected ? UIColor(red: 224/255, green: 210/255, blue: 104/255, alpha: 1) : .systemGray
+    
+        }
+    }
     
     private func saveEventToFirebase(eventId: String) {
         self.eventDataDelegate.addUserEvent(uId: self.userId!, eventId: eventId, isCreated: false) { result in

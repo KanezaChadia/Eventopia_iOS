@@ -38,56 +38,29 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
     var favoritesDelegate: EventDataDelegate!
     var getImageDelegate: GetImageDelegate!
     
+    let myIndicator:UIActivityIndicatorView = UIActivityIndicatorView (style: UIActivityIndicatorView.Style.medium)
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        myIndicator.center = self.view.center
+        self.view.addSubview(myIndicator)
+        myIndicator.bringSubviewToFront(self.view)
+        myIndicator.startAnimating()
         
         docRef = db.collection("users").document(userId!)
         favoritesDelegate = FirebaseHelper()
         getImageDelegate = GetImageHelper()
         
-        useCurrentLocation = UserDefaults.standard.object(forKey: "\(userId!)useCurrentLocation") as? Bool ?? true
         
-        if !useCurrentLocation {
-            if let preferredLocation = UserDefaults.standard.stringArray(forKey: "\(userId!)preferredLocation"),
-               let lat = Double(preferredLocation[3]), let lon = Double(preferredLocation[4]) {
-                let loc = Location(city: preferredLocation[0], coordinates: [lat, lon], state: preferredLocation[1], id: preferredLocation[2])
-                
-                CurrentLocation.preferredLocation = loc
-                locationStr = loc.city
-                getLocalEvents(loc: loc.searchStr)
-            }
-            
-            searchBar.delegate = self
-            searchBar.placeholder = "Find Events"
-         
-           
-           
-        }
+        getLocalEvents(loc: locationStr)
         
-        //getLocalEvents(loc: "Atlanta")
-        
-        //getUserLocation()
-        
-        
-        // Register CustomTableViewHeader xib.
-        let headerNib = UINib.init(nibName: "CustomTableViewHeader", bundle: nil)
-        tableView.register(headerNib, forHeaderFooterViewReuseIdentifier: "header_1")
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        let prefLoc = CurrentLocation.preferredLocation
-        
-        if prefLoc != nil && locationStr != prefLoc!.city {
-            locationStr = prefLoc!.city
-            //getLocalEvents(loc: prefLoc!.searchStr)
-            
-        }
-        
-        getLocalEvents(loc: "Kigali+Rwanda")
+        searchBar.delegate = self
+        searchBar.placeholder = "Find Events"
         
         if !editEvent {
+            var actualEvent = CurrentUser.currentUser?.userEvents
             let currentEventCount = allUserEvents.count
             let actualEventCount = CurrentUser.currentUser?.userEvents?.count
             
@@ -102,46 +75,29 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
                 }
             }
         }
+        // Register CustomTableViewHeader xib.
+        let headerNib = UINib.init(nibName: "CustomTableViewHeader", bundle: nil)
+        tableView.register(headerNib, forHeaderFooterViewReuseIdentifier: "header_1")
     }
     
-    private func getUserLocation() {
-        manager.requestWhenInUseAuthorization()
-
-        if CLLocationManager.locationServicesEnabled() {
-            manager.delegate = self
-            manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            manager.startUpdatingLocation()
-        } else {
-            // Alert user that they need to enable location services.
-            print("Services Disabled")
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let geocoder = CLGeocoder()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        geocoder.reverseGeocodeLocation(locations[0]) { (placemarks, error) in
-            if (error != nil) {
-                return
-            }
+        getLocalEvents(loc: locationStr)
+        
+        if !editEvent {
+            let currentEventCount = allUserEvents.count
+            let actualEventCount = CurrentUser.currentUser?.userEvents?.count
             
-            let placemark = placemarks! as [CLPlacemark]
-            
-            if placemark.count > 0 {
-                let placemark = placemarks![0]
-                
-                if self.locationStr != placemark.locality! {
-                    let currentLocation = Location(city: placemark.locality!, coordinates: [placemark.location!.coordinate.latitude, placemark.location!.coordinate.longitude], state: placemark.administrativeArea!, id: placemark.postalCode!)
-                    
-                    CurrentLocation.location = currentLocation
-                    
-                    if self.useCurrentLocation {
-                        self.locationStr = currentLocation.city
-                        
-                        CurrentLocation.preferredLocation = CurrentLocation.location
-                        
-                        self.getLocalEvents(loc: currentLocation.searchStr)
-                    }
+            CurrentUser.currentUser?.userEvents = CurrentUser.currentUser?.userEvents?.sorted(by: { $0.dateStamp < $1.dateStamp })
+            allUserEvents = CurrentUser.currentUser?.userEvents ?? [Event]()
+            userUpcomingEvents = allUserEvents.filter({ $0.status == "attending" && $0.isPast == false })
+
+            // Reload tableView collectionView if events have been added or removed.
+           
+            if currentEventCount != actualEventCount {
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
                 }
             }
         }
@@ -166,17 +122,11 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
                     print("Task failed with error: \(error.localizedDescription)")
                     return
                 }
-
                 // If there are no errors, check response status code and validate data.
                 guard let httpResponse = response as? HTTPURLResponse,
                       httpResponse.statusCode == 200, // 200 = OK
                       let validData = data
                 else {
-                    DispatchQueue.main.async {
-                        // Present alert on main thread if there is an error with the URL (subreddit does not exist).
-//                        self.present(alert, animated: true, completion: nil)
-                    }
-                    
                     print("JSON object creation failed.")
                     return
                 }
@@ -227,9 +177,12 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
                 self.localEvents = self.localEvents.sorted(by: { $0.dateStamp < $1.dateStamp })
                 
                 DispatchQueue.main.async {
+                    self.myIndicator.stopAnimating()
                     self.tableView.reloadSections(IndexSet([0]), with: .fade)
+                    
                 }
             })
+            
             // Start task.
             task.resume()
         }
@@ -353,9 +306,6 @@ class HomeTableViewController: UITableViewController,CLLocationManagerDelegate {
             destination.editEvent = {
                 self.editEvent = true
             }
-               
-                
-            
         }
         
     }
