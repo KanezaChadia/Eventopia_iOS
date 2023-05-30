@@ -162,6 +162,7 @@ class FirebaseHelper: UserDataDelegate, EventDataDelegate {
                 storageRef.delete { err in
                     if let err = err {
                         print("Error deleting image: \(err)")
+                        
                     } else {
                         print("Image successfully deleted")
                     }
@@ -171,8 +172,10 @@ class FirebaseHelper: UserDataDelegate, EventDataDelegate {
                 db.collection("events").document(event.id).delete() { err in
                     if let err = err {
                         print("Error removing event: \(err)")
+                        completion(false)
                     } else {
                         print("Event successfully removed from Firebase.")
+                        completion(true)
                     }
                 }
             }

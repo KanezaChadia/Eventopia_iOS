@@ -958,9 +958,7 @@
                                 </hierarchicalColors>
                             </imageReference>
                             <connections>
-                                <segue destination="dle-a4-y5w" kind="popoverPresentation" identifier="" popoverAnchorBarButtonItem="Ets-dH-PhS" id="AU6-2Q-Usr">
-                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                </segue>
+                                <segue destination="dle-a4-y5w" kind="presentation" modalPresentationStyle="fullScreen" id="Xq8-9u-7sb"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -969,8 +967,8 @@
                         <outlet property="segmentedControl" destination="LSC-tl-ddB" id="ZnG-ch-2bF"/>
                         <outlet property="tableView" destination="KIG-zY-XyU" id="xQj-3R-LSM"/>
                         <segue destination="cdV-iO-Qbc" kind="presentation" identifier="goToDetails" modalPresentationStyle="fullScreen" id="e90-RQ-nas"/>
-                        <segue destination="dle-a4-y5w" kind="presentation" identifier="goToEdit" id="vrv-RI-lxI"/>
-                        <segue destination="dle-a4-y5w" kind="presentation" id="MI4-Re-lWK"/>
+                        <segue destination="dle-a4-y5w" kind="presentation" identifier="goToEdit" modalPresentationStyle="fullScreen" id="vrv-RI-lxI"/>
+                        <segue destination="dle-a4-y5w" kind="presentation" modalPresentationStyle="fullScreen" id="MI4-Re-lWK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sYI-sD-GKY" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -1287,11 +1285,11 @@
             <objects>
                 <viewController id="dle-a4-y5w" customClass="CreateEventViewController" customModule="Eventopia" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="23c-Lw-PLn">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OFy-G6-M5h">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="56"/>
+                                <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                                 <color key="barTintColor" systemColor="systemBackgroundColor"/>
                                 <items>
                                     <navigationItem title="Create Event" id="SHb-kA-jy8">
@@ -1311,7 +1309,7 @@
                                 </items>
                             </navigationBar>
                             <imageView clipsSubviews="YES" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="6t6-Jh-9CC">
-                                <rect key="frame" x="20" y="76" width="374" height="200"/>
+                                <rect key="frame" x="20" y="108" width="374" height="200"/>
                                 <color key="backgroundColor" systemColor="systemGray2Color"/>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
@@ -1319,7 +1317,7 @@
                                 </constraints>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="51q-9d-gMa">
-                                <rect key="frame" x="0.0" y="752" width="414" height="90"/>
+                                <rect key="frame" x="0.0" y="806" width="414" height="90"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="odd-LK-WOi">
                                         <rect key="frame" x="35" y="8" width="344" height="44"/>
@@ -1348,7 +1346,7 @@
                                 </constraints>
                             </view>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Event Title" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pko-Mc-4Kq">
-                                <rect key="frame" x="20" y="296" width="374" height="34"/>
+                                <rect key="frame" x="20" y="328" width="374" height="34"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <userDefinedRuntimeAttributes>
@@ -1362,27 +1360,27 @@
                                 </userDefinedRuntimeAttributes>
                             </textField>
                             <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Event Date" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="WXl-Lf-GN0">
-                                <rect key="frame" x="20" y="350" width="374" height="34"/>
+                                <rect key="frame" x="20" y="382" width="374" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SEX-Oz-NiV">
-                                <rect key="frame" x="20" y="350" width="374" height="34"/>
+                                <rect key="frame" x="20" y="382" width="374" height="34"/>
                             </view>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Event Price" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="JZp-wH-CcI">
-                                <rect key="frame" x="20" y="404" width="374" height="34"/>
+                                <rect key="frame" x="20" y="436" width="374" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                 <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                             </textField>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Event Description" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="7Q7-jr-EGk">
-                                <rect key="frame" x="20" y="512" width="374" height="220"/>
+                                <rect key="frame" x="20" y="544" width="374" height="242"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="systemGray3Color"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <tableView hidden="YES" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" separatorInsetReference="fromAutomaticInsets" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="TT1-yc-IUY">
-                                <rect key="frame" x="20" y="487" width="374" height="245"/>
+                                <rect key="frame" x="20" y="519" width="374" height="267"/>
                                 <color key="backgroundColor" red="0.76078431369999999" green="0.90588235289999997" blue="0.98039215690000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="separatorColor" systemColor="systemGray3Color"/>
                                 <inset key="separatorInset" minX="6" minY="0.0" maxX="0.0" maxY="0.0"/>
@@ -1419,7 +1417,7 @@
                                 </connections>
                             </tableView>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Event Location" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="zMW-lQ-9mc">
-                                <rect key="frame" x="20" y="458" width="374" height="34"/>
+                                <rect key="frame" x="20" y="490" width="374" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>
@@ -1429,18 +1427,18 @@
                                 </connections>
                             </textField>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="U9Z-Xq-rac" customClass="CustomActivityIndicatorView" customModule="Eventopia" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tun-2w-JDV">
-                                        <rect key="frame" x="11.5" y="224.5" width="391" height="393"/>
+                                        <rect key="frame" x="11.5" y="251.5" width="391" height="393"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     </view>
                                     <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" style="inline" translatesAutoresizingMaskIntoConstraints="NO" id="4CC-1N-Fxh">
-                                        <rect key="frame" x="11.5" y="224.5" width="391" height="393"/>
+                                        <rect key="frame" x="11.5" y="251.5" width="391" height="393"/>
                                         <color key="tintColor" name="AccentColor"/>
                                     </datePicker>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fv8-TX-0Ix">
-                                        <rect key="frame" x="35" y="657.5" width="344" height="44"/>
+                                        <rect key="frame" x="35" y="684.5" width="344" height="44"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="44" id="K7y-LN-gx6"/>
                                         </constraints>
@@ -1458,11 +1456,11 @@
                                         </connections>
                                     </button>
                                     <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="5VF-J2-GbU">
-                                        <rect key="frame" x="188.5" y="402.5" width="37" height="37"/>
+                                        <rect key="frame" x="188.5" y="429.5" width="37" height="37"/>
                                         <color key="color" name="AccentColor"/>
                                     </activityIndicatorView>
                                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Creating your event..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wQA-GM-hWt">
-                                        <rect key="frame" x="20" y="447.5" width="374" height="21"/>
+                                        <rect key="frame" x="20" y="474.5" width="374" height="21"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                         <color key="textColor" systemColor="systemGrayColor"/>
                                         <nil key="highlightedColor"/>
@@ -1560,7 +1558,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="MI4-Re-lWK"/>
+        <segue reference="vrv-RI-lxI"/>
         <segue reference="e90-RQ-nas"/>
     </inferredMetricsTieBreakers>
     <resources>
@@ -1576,7 +1574,7 @@
         <image name="person.circle" catalog="system" width="128" height="121"/>
         <image name="plus" catalog="system" width="128" height="113"/>
         <namedColor name="AccentColor">
-            <color red="1" green="0.79199999570846558" blue="0.15700000524520874" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.80400002002716064" blue="0.20399999618530273" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
