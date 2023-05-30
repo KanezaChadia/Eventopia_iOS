@@ -26,9 +26,6 @@ class EventsViewController: UIViewController,UITableViewDelegate, UITableViewDat
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        
-       
-        
         segmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor(red: 224/255, green: 210/255, blue: 104/255, alpha: 1)], for: .selected)
     }
     

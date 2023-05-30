@@ -108,25 +108,42 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         datePickerView.statusLbl.isHidden = true
         datePickerView.isHidden = false
     }
-    @IBAction func deleteBtnTapped(_ sender: Any) {
+    @IBAction func deleteBtnTapped(_ sender: UIButton) {
         
-        // Create alert to be displayed if proper conditions are not met.
-        let alert = UIAlertController(title: "Delete Event?", message: "Are you sure that you want to delete this event? Doing so will delete this event along with all associated media and this action cannot be undone.", preferredStyle: .alert)
-        // Add actions to alert controller.
-        alert.addAction(UIAlertAction(title: "Keep", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { action in
-            self.eventDataDelegate.deleteFirebaseEvent(event: self.event!) { result in
-                if result == false {
-                    print("There was an issue deleting this event.")
-                } else {
-                    self.dismiss(animated: true, completion: nil)
-                }
-            }
-        }))
-        
-        // Show alert.
-        self.present(alert, animated: true, completion: nil)
+        showDeleteAlert()
     }
+    
+    
+    func showDeleteAlert() {
+        let alertController = UIAlertController(title: "Delete Item", message: "Are you sure you want to delete this item?", preferredStyle: .alert)
+        
+        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { (_) in
+            // Perform deletion in Firebase and handle errors
+            self.deleteItem()
+        }
+        
+        let keepAction = UIAlertAction(title: "Keep", style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(keepAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func deleteItem() {
+        
+        self.eventDataDelegate.deleteFirebaseEvent(event: self.event!) { result in
+            if result == false {
+                print("There was an issue deleting this event.")
+            } else {
+                //self.dismiss(animated: true, completion: nil)
+                self.presentingViewController?.dismiss(animated: true, completion: nil)
+            }
+        }
+        
+    }
+    
+    
     
     @IBAction func updateSuggestionResults(_ sender: UITextField) {
         searchCompleter?.queryFragment = eventLocationTF.text ?? ""
